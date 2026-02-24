@@ -21,7 +21,7 @@ export default function Home() {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:3000/attendance", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}attendance`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullname, schedule }),
