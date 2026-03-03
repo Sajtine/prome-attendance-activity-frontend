@@ -2,14 +2,13 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
 const LoginViews = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [admins, setAdmins] = useState([]);
   const [message, setMessage] = useState({ type: "", text: "" });
 
   const router = useRouter();
@@ -30,7 +29,7 @@ const LoginViews = () => {
         // Success message
         setMessage({
           type: "success",
-          text: "Welcome, Admin!",
+          text: "Logging In...",
         });
 
         router.push("/admin/dashboard");
