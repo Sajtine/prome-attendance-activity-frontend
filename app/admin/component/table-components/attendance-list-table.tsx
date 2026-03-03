@@ -30,19 +30,27 @@ import {
 } from "@/components/ui/select";
 import axios from "axios";
 
-type Attendance = {
+
+interface Attendance {
   id: number;
+  ref_id: string;
   fullname: string;
   schedule: string;
 };
 
-export default function TableComponent() {
+interface TableProps {
+  results: Attendance[] | null ;
+};
+
+export default function TableComponent({results}: TableProps) {
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Attendance | null>(null);
 
   const [selectedSched, setSelectedSched] = useState("all");
+
+ const tableData = results === null ? attendance : results;
 
   useEffect(() => {
     fetch("http://localhost:3000/attendance")
@@ -124,33 +132,36 @@ export default function TableComponent() {
                     </Button> */}
 
           <div className="flex items-center gap-4">
-            <Select onValueChange={handleFilter} value={selectedSched}>
+            <label htmlFor="" className="text-gray-500 text-sm">Filter by: </label>
+            <Select onValueChange={handleFilter} value={selectedSched} >
               <SelectTrigger
                 className="
-                w-[140px] 
-                border-2 
-                border-teal-500 
-                text-gray-800 
-                focus:outline-none 
-                focus:ring-0
-                data-[placeholder]:text-gray-400
-                data-[state=open]:border-teal-500
-                data-[state=closed]:border-teal-500
-              "
+                  w-20
+                  border-2
+                  border-gray-400
+                  text-[12px]
+                  px-2
+                  leading-tight
+                  focus:outline-none
+                  focus:ring-0
+                  data-placeholder:text-gray-500
+                  data-[state=open]:border-gray-400
+                  data-[state=closed]:border-gray-400
+                "
               >
                 <SelectValue placeholder="Select schedule" />
               </SelectTrigger>
 
-              <SelectContent className="bg-white text-gray-800 border border-green-600">
+              <SelectContent className="bg-white text-gray-800 border border-gray-600">
                 <SelectGroup>
                   <SelectLabel>Schedule</SelectLabel>
-                  <SelectItem value="all" className="hover:bg-green-100">
+                  <SelectItem value="all" className="text-[10px] hover:bg-green-100">
                     All
                   </SelectItem>
-                  <SelectItem value="Day1" className="hover:bg-green-100">
+                  <SelectItem value="Day1" className="text-[10px] hover:bg-green-100">
                     Day 1
                   </SelectItem>
-                  <SelectItem value="Day2" className="hover:bg-green-100">
+                  <SelectItem value="Day2" className="text-[10px] hover:bg-green-100">
                     Day 2
                   </SelectItem>
                 </SelectGroup>
@@ -177,7 +188,8 @@ export default function TableComponent() {
             </TableHeader>
 
             <TableBody>
-              {attendance.map((data) => (
+              {tableData.length > 0 ? (
+              tableData.map((data) => (
                 <TableRow
                   key={data.id}
                   className="hover:bg-gray-50 transition-colors"
@@ -197,13 +209,29 @@ export default function TableComponent() {
                         setSelected(data);
                         setOpen(true);
                       }}
-                      className="bg-green-600 hover:bg-green-700 text-white"
+                      className="mx-2 bg-blue-950 hover:bg-green-700 text-white"
                     >
                       Update
                     </Button>
+                    <Button
+                      // onClick={() => {
+                      //   setSelected(data);
+                      //   setOpen(true);
+                      // }}
+                      className="mx-2 bg-red-900 hover:bg-green-700 text-white"
+                    >
+                      Remove
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+              ))
+              ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                  No results found
+                </TableCell>
+              </TableRow>
+            )}
             </TableBody>
           </Table>
 
