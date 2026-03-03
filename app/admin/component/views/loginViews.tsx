@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -31,8 +31,9 @@ const LoginViews = () => {
           type: "success",
           text: "Logging In...",
         });
-
+        
         router.push("/admin/dashboard");
+
       } else {
         // Error message
         setMessage({
@@ -53,6 +54,8 @@ const LoginViews = () => {
     setUsername("");
     setPassword("");
   };
+
+  
   return (
     <div className="flex justify-center items-center min-h-screen bg-linear-to-br from-white via-gray-600 to-white">
       <div className="w-105 p-10 flex flex-col items-center rounded-2xl shadow-2xl bg-white">
