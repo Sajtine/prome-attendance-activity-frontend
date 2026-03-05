@@ -7,6 +7,7 @@ export default function Home() {
   const [schedule, setSchedule] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageStatus,setMessageStatus] = useState(true);
 
   const handleSubmitSched = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,10 +30,14 @@ export default function Home() {
 
       if (!res.ok) throw new Error("Failed to submit");
 
+      //created data returned from the backend
+      const createdData = await res.json();
+      console.log(createdData);
+
       setFullname("");
       setSchedule("");
 
-      setMessage("  Attendance submitted successfully!");
+      setMessage(`"Attendee registered!" NOTE THIS REFERENCE ID : ${createdData.ref_id}`);
     } catch (err) {
       console.error(err);
       setMessage("Error submitting attendance.");
