@@ -122,6 +122,7 @@ const AdminViews = () => {
     }
   };
 
+  // websocket listeners for real-time updates
   useEffect(() => {
     socket.on("attendance_create", (payload) => {
       setSearchResult((prev) => [...prev, payload.data]);
