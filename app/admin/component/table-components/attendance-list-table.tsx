@@ -39,82 +39,22 @@ interface Attendance {
 };
 
 interface TableProps {
-  results: Attendance[] | null ;
+  results: Attendance[];
+  isLoading?: boolean;          // optional loading state
+  onFilter: (schedule: string) => void; // pass filter handler
+  selectedSched: string;      
 };
 
-export default function TableComponent({results}: TableProps) {
-  const [attendance, setAttendance] = useState<Attendance[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+export default function TableComponent({results,isLoading,onFilter,selectedSched}: TableProps) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Attendance | null>(null);
 
-  const [selectedSched, setSelectedSched] = useState("all");
+ const tableData = results;
 
- const tableData = results === null ? attendance : results;
-
-  useEffect(() => {
-    fetch("http://localhost:3000/attendance")
-      .then((res) => res.json())
-      .then((data) => {
-        setAttendance(data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setIsLoading(false);
-      });
-  }, []);
-
-  // Handle filtering by schedule
-  const handleFilter = async (schedule: string) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/attendance/schedule/${schedule}`,
-      );
-
-      if (schedule.toLocaleLowerCase() === "all") {
-        const allResponse = await axios.get("http://localhost:3000/attendance");
-        console.log("All attendance data:", allResponse.data);
-        setAttendance(allResponse.data);
-        setSelectedSched(schedule);
-        return;
-      }
-
-      console.log("Filtered attendance data:", response.data);
-
-      setSelectedSched(schedule);
-      setAttendance(response.data);
-    } catch (err) {
-      console.log(err);
-    }
+ const handleFilter = async (schedule: string) => {
+    onFilter(schedule); // call the parent filter handler
   };
-
-  // Listen to the websocket for real-time updates
-  useEffect(() => {
-    // Listen for attendance creation
-    socket.on("attendance_create", (payload) => {
-      console.log("Received websocket event:", payload);
-
-      setAttendance((prev) => [...prev, payload.data]);
-    });
-
-    // Listen for attendance updates
-    socket.on("attendance_update", (payload) => {
-      console.log("Received websocket update event:", payload);
-
-      setAttendance((prev) =>
-        prev.map((att) =>
-          att.id === Number(payload.data.id) ? payload.data : att,
-        ),
-      );
-    });
-
-    // Cleanup on unmount
-    return () => {
-      socket.off("attendance_create");
-      socket.off("attendance_update");
-    };
-  }, []);
 
   if (isLoading)
     return (

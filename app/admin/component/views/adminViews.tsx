@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { LayoutDashboard, User, Settings, LogOut, ChevronDown, Search} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import { socket } from "@/lib/socket";
 
 interface AdminData {
   id: number;
@@ -31,6 +32,7 @@ const AdminViews = () => {
   const[searchInput,setSearchInput] = useState("")
   //for table result
   const [search_result,setSearchResult] = useState<SearchResult[]>([]);
+  const [selectedSched, setSelectedSched] = useState("all");
 
 
   useEffect(() => {
@@ -55,7 +57,7 @@ const AdminViews = () => {
     router.push("/admin");
   };
 
-  useEffect(() => {
+   useEffect(() => {
     fetch("http://localhost:3000/attendance")
       .then((res) => res.json())
       .then((data) => {
@@ -67,7 +69,7 @@ const AdminViews = () => {
   }, []);
 
   
-  const handleSearch = async () => {
+   const handleSearch = async () => {
     const query = searchInput.trim();
 
     if (!query) {
@@ -92,6 +94,48 @@ const AdminViews = () => {
       console.error('Search failed:', err);
     }
   };
+
+   const handleFilter = async (schedule: string) => {
+  try {
+    setSelectedSched(schedule);
+
+    if (schedule.toLowerCase() === "all") {
+      const res = await axios.get(
+        "http://localhost:3000/attendance"
+      );
+      setSearchResult(res.data);
+      return;
+    }
+
+    const res = await axios.get(
+      `http://localhost:3000/attendance/schedule/${schedule}`
+    );
+
+    setSearchResult(res.data);
+
+  } catch (err) {
+    console.error("Filter failed:", err);
+  }
+};
+
+  useEffect(() => {
+  socket.on("attendance_create", (payload) => {
+    setSearchResult(prev => [...prev, payload.data]);
+  });
+
+  socket.on("attendance_update", (payload) => {
+    setSearchResult(prev =>
+      prev.map(att =>
+        att.id === Number(payload.data.id) ? payload.data : att
+      )
+    );
+  });
+
+  return () => {
+    socket.off("attendance_create");
+    socket.off("attendance_update");
+  };
+}, []);
 
   if (isChecking)
     return (
@@ -181,16 +225,20 @@ const AdminViews = () => {
                     setSearchInput(e.target.value);
                   }}
               placeholder=  "Search"
-              className="h-10 w-64 rounded-l-2xl border-gray-400 border-2 border-r-0 px-4 focus:outline-none focus:ring-1 focus:ring-gray-200"
+              className="h-10 w-64 rounded-l-lg border-gray-400 border-2 border-r-0 px-4 focus:outline-none focus:ring-1 focus:ring-gray-200"
             />
-            <Button type="button" onClick={handleSearch} className="h-10 border-2 border-gray-400 border-l-0 rounded-l-none rounded-r-2xl px-4">
+            <Button type="button" onClick={handleSearch} className="h-10 border-2 border-gray-400 border-l-0 rounded-l-none rounded-r-lg px-4">
               <Search className="h-4 w-4" />
             </Button>
           </div>
         </div>
         {isLoggedIn && (
           <div className="bg-white rounded-lg shadow-lg p-4">
-            <TableComponent results={search_result}/>
+            <TableComponent 
+            results={search_result}
+            isLoading={isChecking}
+            onFilter={handleFilter}
+            selectedSched={selectedSched}/>
           </div>
         )}
       </div>
