@@ -1,6 +1,5 @@
 'use client';
 
-import { socket } from "@/lib/socket";
 import { useEffect, useState } from "react";
 type Attendance = {
   id: number;
@@ -35,7 +34,7 @@ export default function UpdateSheetComponent({ data, onClose }: Props) {
   
 
     try {
-      await fetch(`http://localhost:3000/attendance/${data.id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/attendance/${data.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullname, schedule }),

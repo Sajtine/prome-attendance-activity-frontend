@@ -23,7 +23,7 @@ const LandingCard = () => {
 
     // Clear previous results before running new search
     try {
-      const response = await axios.get(`http://localhost:3000/attendance/find/${referenceID}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/attendance/find/${referenceID}`);
       console.log(referenceID)
 
       if (response.data) {
