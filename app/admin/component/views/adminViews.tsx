@@ -3,7 +3,14 @@
 import TableComponent from "@/app/admin/component/table-components/attendance-list-table";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, User, Settings, LogOut, ChevronDown, Search} from "lucide-react";
+import {
+  LayoutDashboard,
+  User,
+  Settings,
+  LogOut,
+  ChevronDown,
+  Search,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { socket } from "@/lib/socket";
@@ -16,9 +23,9 @@ interface AdminData {
 
 interface SearchResult {
   id: number;
-  ref_id: string
-  fullname: string
-  schedule: string
+  ref_id: string;
+  fullname: string;
+  schedule: string;
 }
 
 const AdminViews = () => {
@@ -29,11 +36,10 @@ const AdminViews = () => {
   const [adminData, setAdminData] = useState<AdminData | null>(null);
 
   //for Search
-  const[searchInput,setSearchInput] = useState("")
+  const [searchInput, setSearchInput] = useState("");
   //for table result
-  const [search_result,setSearchResult] = useState<SearchResult[]>([]);
+  const [search_result, setSearchResult] = useState<SearchResult[]>([]);
   const [selectedSched, setSelectedSched] = useState("all");
-
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -42,9 +48,9 @@ const AdminViews = () => {
         router.push("/admin");
       } else {
         const parsedAdmin = JSON.parse(admin);
-          console.log("Parsed admin data:", parsedAdmin);
-          setIsLoggedIn(true);
-          setAdminData(parsedAdmin);
+        console.log("Parsed admin data:", parsedAdmin);
+        setIsLoggedIn(true);
+        setAdminData(parsedAdmin);
       }
       setIsChecking(false);
     }, 1000);
@@ -57,8 +63,9 @@ const AdminViews = () => {
     router.push("/admin");
   };
 
-   useEffect(() => {
-    fetch("http://localhost:3000/attendance")
+  useEffect(() => {
+    // fetch("http://localhost:3000/attendance")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/attendance`) // hosted backend URL from .env
       .then((res) => res.json())
       .then((data) => {
         setSearchResult(data);
@@ -68,74 +75,71 @@ const AdminViews = () => {
       });
   }, []);
 
-  
-   const handleSearch = async () => {
+  // Search by name
+  const handleSearch = async () => {
     const query = searchInput.trim();
 
     if (!query) {
-      const response = await axios.get('http://localhost:3000/attendance');
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/attendance`);
       setSearchResult(response.data);
       return;
     }
 
     try {
       const response = await axios.get(
-        'http://localhost:3000/attendance/search',
-        { params: { input: query } }
+        `${process.env.NEXT_PUBLIC_API_URL}/attendance/search`,
+        { params: { input: query } },
       );
-      console.log('API response:', response.data);
-      if (response.data.length>0){
+      console.log("API response:", response.data);
+      if (response.data.length > 0) {
         setSearchResult(response.data);
-      }else{
+      } else {
         setSearchResult([]);
       }
-      
     } catch (err) {
-      console.error('Search failed:', err);
+      console.error("Search failed:", err);
     }
   };
 
-   const handleFilter = async (schedule: string) => {
-  try {
-    setSelectedSched(schedule);
+  // Filter by schedule
+  const handleFilter = async (schedule: string) => {
+    try {
+      setSelectedSched(schedule);
 
-    if (schedule.toLowerCase() === "all") {
+      if (schedule.toLowerCase() === "all") {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/attendance`);
+        setSearchResult(res.data);
+        return;
+      }
+
       const res = await axios.get(
-        "http://localhost:3000/attendance"
+        `${process.env.NEXT_PUBLIC_API_URL}/attendance/schedule/${schedule}`,
       );
+
       setSearchResult(res.data);
-      return;
+    } catch (err) {
+      console.error("Filter failed:", err);
     }
-
-    const res = await axios.get(
-      `http://localhost:3000/attendance/schedule/${schedule}`
-    );
-
-    setSearchResult(res.data);
-
-  } catch (err) {
-    console.error("Filter failed:", err);
-  }
-};
+  };
 
   useEffect(() => {
-  socket.on("attendance_create", (payload) => {
-    setSearchResult(prev => [...prev, payload.data]);
-  });
+    socket.on("attendance_create", (payload) => {
+      setSearchResult((prev) => [...prev, payload.data]);
+    });
 
-  socket.on("attendance_update", (payload) => {
-    setSearchResult(prev =>
-      prev.map(att =>
-        att.id === Number(payload.data.id) ? payload.data : att
-      )
-    );
-  });
+    socket.on("attendance_update", (payload) => {
+      setSearchResult((prev) =>
+        prev.map((att) =>
+          att.id === Number(payload.data.id) ? payload.data : att,
+        ),
+      );
+    });
 
-  return () => {
-    socket.off("attendance_create");
-    socket.off("attendance_update");
-  };
-}, []);
+    return () => {
+      socket.off("attendance_create");
+      socket.off("attendance_update");
+    };
+  }, []);
 
   if (isChecking)
     return (
@@ -158,14 +162,16 @@ const AdminViews = () => {
 
         {/* Account dropdown */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setIsOpen(!isOpen)}
             className="flex items-center space-x-3 bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2 transition"
           >
             <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-white" />
             </div>
-            <span className="text-white text-sm hidden md:block">{adminData?.username || "Admin"}</span>
+            <span className="text-white text-sm hidden md:block">
+              {adminData?.username || "Admin"}
+            </span>
             <ChevronDown className="w-4 h-4 text-white" />
           </button>
 
@@ -181,7 +187,7 @@ const AdminViews = () => {
                 <span>Settings</span>
               </button>
               <hr className="my-1" />
-              <button 
+              <button
                 onClick={handleSignOut}
                 className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
               >
@@ -204,41 +210,44 @@ const AdminViews = () => {
               Review and manage all registered attendees.
             </p>
           </div>
-         
+
           <div className="flex items-center">
             <input
               type="text"
               value={searchInput}
               onChange={(e) => {
-
-
-                  // Optional: live search while typing
-                  const query = e.target.value.trim();
-                  if (query === '') {
-                       axios
-                        .get('http://localhost:3000/attendance')
-                        .then(res => setSearchResult(res.data)) // if res.data = [], tableData = []
-                        .catch(err => {
-                          console.error(err);
-                        });
-                    };
-                    setSearchInput(e.target.value);
-                  }}
-              placeholder=  "Search"
+                // Optional: live search while typing
+                const query = e.target.value.trim();
+                if (query === "") {
+                  axios
+                    .get(`${process.env.NEXT_PUBLIC_API_URL}/attendance`)
+                    .then((res) => setSearchResult(res.data)) // if res.data = [], tableData = []
+                    .catch((err) => {
+                      console.error(err);
+                    });
+                }
+                setSearchInput(e.target.value);
+              }}
+              placeholder="Search"
               className="h-10 w-64 rounded-l-lg border-gray-400 border-2 border-r-0 px-4 focus:outline-none focus:ring-1 focus:ring-gray-200"
             />
-            <Button type="button" onClick={handleSearch} className="h-10 border-2 border-gray-400 border-l-0 rounded-l-none rounded-r-lg px-4">
+            <Button
+              type="button"
+              onClick={handleSearch}
+              className="h-10 border-2 border-gray-400 border-l-0 rounded-l-none rounded-r-lg px-4"
+            >
               <Search className="h-4 w-4" />
             </Button>
           </div>
         </div>
         {isLoggedIn && (
           <div className="bg-white rounded-lg shadow-lg p-4">
-            <TableComponent 
-            results={search_result}
-            isLoading={isChecking}
-            onFilter={handleFilter}
-            selectedSched={selectedSched}/>
+            <TableComponent
+              results={search_result}
+              isLoading={isChecking}
+              onFilter={handleFilter}
+              selectedSched={selectedSched}
+            />
           </div>
         )}
       </div>
