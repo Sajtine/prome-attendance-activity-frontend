@@ -28,7 +28,7 @@ export default function TableComponent(){
     const [selected, setSelected] = useState<Attendance | null>(null);
 
     useEffect(()=>{
-        fetch("http://localhost:3000/attendance")
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/attendance`)
         .then(res=>res.json())
         .then(data=>{
             setAttendance(data);
