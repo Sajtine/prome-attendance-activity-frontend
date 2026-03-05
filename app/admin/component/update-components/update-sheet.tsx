@@ -1,5 +1,6 @@
 'use client';
 
+import { socket } from "@/lib/socket";
 import { useEffect, useState } from "react";
 type Attendance = {
   id: number;
@@ -26,6 +27,7 @@ export default function UpdateSheetComponent({ data, onClose }: Props) {
     setSchedule(data.schedule);
   }, [data]);
 
+ 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setUpdating(true);

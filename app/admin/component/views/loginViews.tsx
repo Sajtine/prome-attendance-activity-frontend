@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 const LoginViews = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [admins, setAdmins] = useState([]);
   const [message, setMessage] = useState({ type: "", text: "" });
 
   const router = useRouter();
@@ -30,10 +29,11 @@ const LoginViews = () => {
         // Success message
         setMessage({
           type: "success",
-          text: "Welcome, Admin!",
+          text: "Logging In...",
         });
-
+        
         router.push("/admin/dashboard");
+
       } else {
         // Error message
         setMessage({
@@ -54,6 +54,8 @@ const LoginViews = () => {
     setUsername("");
     setPassword("");
   };
+
+  
   return (
     <div className="flex justify-center items-center min-h-screen bg-linear-to-br from-white via-gray-600 to-white">
       <div className="w-105 p-10 flex flex-col items-center rounded-2xl shadow-2xl bg-white">
