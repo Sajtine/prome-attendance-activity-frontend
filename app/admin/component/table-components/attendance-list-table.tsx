@@ -42,11 +42,12 @@ interface TableProps {
   results: Attendance[];
   isLoading?: boolean;          // optional loading state
   onFilter: (schedule: string) => void; // pass filter handler
-  selectedSched: string;      
+  selectedSched: string; 
+  onDelete: (id: number) => void; // pass delete handler     
 };
 
 
-export default function TableComponent({results,isLoading,onFilter,selectedSched}: TableProps) {
+export default function TableComponent({results, isLoading, onFilter, selectedSched, onDelete}: TableProps) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Attendance | null>(null);
 
@@ -164,10 +165,7 @@ export default function TableComponent({results,isLoading,onFilter,selectedSched
                       Update
                     </Button>
                     <Button
-                      // onClick={() => {
-                      //   setSelected(data);
-                      //   setOpen(true);
-                      // }}
+                      onClick={() => onDelete(data.id)}
                       className="mx-2 bg-red-900 hover:bg-green-700 text-white"
                     >
                       Remove

@@ -14,7 +14,7 @@ export default function UpdatePage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch(`http://localhost:3000/attendance/${id}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/attendance/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setFullname(data.fullname);
@@ -33,7 +33,7 @@ export default function UpdatePage() {
     setMessage("");
 
     try {
-      await fetch(`http://localhost:3000/attendance/${id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/attendance/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullname, schedule }),

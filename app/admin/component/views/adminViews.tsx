@@ -122,6 +122,16 @@ const AdminViews = () => {
     }
   };
 
+  // delete attendance record by id
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/attendance/delete/${id}`);
+      setSearchResult((prev) => prev.filter((att) => att.id !== id));
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  }
+
   // websocket listeners for real-time updates
   useEffect(() => {
     socket.on("attendance_create", (payload) => {
@@ -248,6 +258,7 @@ const AdminViews = () => {
               isLoading={isChecking}
               onFilter={handleFilter}
               selectedSched={selectedSched}
+              onDelete={handleDelete}
             />
           </div>
         )}
